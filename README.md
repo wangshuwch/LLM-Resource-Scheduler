@@ -68,6 +68,7 @@ python -m pytest tests/ --cov=src --cov-report=term-missing
 LLM-Resource-Scheduler/
 ├── src/
 │   ├── scheduler/        # 调度引擎核心模块
+│   │   ├── __init__.py
 │   │   ├── models.py     # 数据模型定义
 │   │   ├── monitor.py    # 资源监控模块
 │   │   ├── llm_pool.py   # Mock LLM 池
@@ -75,7 +76,6 @@ LLM-Resource-Scheduler/
 │   │   └── scheduler.py  # 调度器（已完成）
 │   ├── api/              # API 接口模块
 │   │   ├── __init__.py
-│   │   ├── routes.py     # API 路由
 │   │   └── schemas.py    # API 数据模型
 │   └── main.py           # 应用入口
 ├── examples/             # 示例脚本
@@ -94,9 +94,12 @@ LLM-Resource-Scheduler/
 │   │   ├── test_request_processing.py # 请求处理测试
 │   │   ├── test_monitor.py         # 监控模块测试
 │   │   ├── test_llm_pool.py        # LLM 池测试
-│   │   └── test_models.py          # 数据模型测试
+│   │   ├── test_models.py          # 数据模型测试
+│   │   └── test_api_schemas.py     # API 数据模型测试
 │   ├── integration/      # 集成测试
-│   │   └── test_integration.py     # 集成测试
+│   │   ├── __init__.py
+│   │   ├── test_integration.py     # 集成测试
+│   │   └── test_api_integration.py # API 集成测试
 │   └── conftest.py       # 测试配置
 ├── config/               # 配置文件
 │   └── settings.py       # 系统设置
@@ -104,6 +107,8 @@ LLM-Resource-Scheduler/
 │   ├── documents/        # 设计文档
 │   └── specs/            # 实现规格
 ├── requirements.txt      # 依赖包
+├── fix_escape.py         # 修复工具脚本
+├── verify_acceptance_criteria.py # 验收标准验证脚本
 └── README.md
 ```
 
