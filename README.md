@@ -71,8 +71,13 @@ LLM-Resource-Scheduler/
 │   │   ├── models.py     # 数据模型定义
 │   │   ├── monitor.py    # 资源监控模块
 │   │   ├── llm_pool.py   # Mock LLM 池
+│   │   ├── config.py     # 场景配置管理
 │   │   └── scheduler.py  # 调度器（已完成）
-│   └── api/              # API 接口模块
+│   ├── api/              # API 接口模块
+│   │   ├── __init__.py
+│   │   ├── routes.py     # API 路由
+│   │   └── schemas.py    # API 数据模型
+│   └── main.py           # 应用入口
 ├── examples/             # 示例脚本
 │   ├── mock_scheduler_demo.py  # 完整 Mock 调度演示
 │   ├── basic_usage.py    # 基础使用示例
@@ -81,10 +86,23 @@ LLM-Resource-Scheduler/
 │   └── README.md         # 示例说明
 ├── tests/
 │   ├── unit/             # 单元测试
-│   │   └── test_scheduler.py  # 调度器测试
-│   └── integration/      # 集成测试
+│   │   ├── test_scheduler.py      # 调度器测试
+│   │   ├── test_scheduler_phase2.py # 阶段二测试
+│   │   ├── test_scheduler_coverage.py # 调度器覆盖率测试
+│   │   ├── test_config.py          # 配置模块测试
+│   │   ├── test_config_coverage.py # 配置模块覆盖率测试
+│   │   ├── test_request_processing.py # 请求处理测试
+│   │   ├── test_monitor.py         # 监控模块测试
+│   │   ├── test_llm_pool.py        # LLM 池测试
+│   │   └── test_models.py          # 数据模型测试
+│   ├── integration/      # 集成测试
+│   │   └── test_integration.py     # 集成测试
+│   └── conftest.py       # 测试配置
 ├── config/               # 配置文件
+│   └── settings.py       # 系统设置
 ├── .trae/                # 项目规格和文档
+│   ├── documents/        # 设计文档
+│   └── specs/            # 实现规格
 ├── requirements.txt      # 依赖包
 └── README.md
 ```
@@ -120,7 +138,15 @@ LLM-Resource-Scheduler/
 - 支持配置延迟范围
 - 自动更新资源监控
 
-### 4. 调度器 (src/scheduler/scheduler.py)
+### 4. 场景配置管理 (src/scheduler/config.py)
+
+场景配置管理模块，支持配置热更新：
+- 场景配置的创建、更新、删除和查询
+- 配置参数的合法性验证
+- 配置热更新支持，无需重启服务
+- 线程安全的配置操作
+
+### 5. 调度器 (src/scheduler/scheduler.py)
 
 核心调度引擎，已完成开发：
 - 基于优先级和时间的请求队列管理
@@ -128,6 +154,7 @@ LLM-Resource-Scheduler/
 - 异步请求处理
 - 队头阻塞修复（支持跳过不可处理的请求）
 - 系统状态监控
+- 资源充足场景下的直接处理
 
 ## 开发阶段
 
@@ -139,6 +166,13 @@ LLM-Resource-Scheduler/
 - 调度器实现（含优先级排序和队头阻塞修复）
 - 完整的单元测试和集成测试
 - 示例脚本和演示
+
+### 阶段二（已完成）✅
+- 场景配置模块完善（支持热更新）
+- 调度引擎优化（资源充足场景分配逻辑）
+- 请求处理流程完善（状态跟踪和Token消耗统计）
+- 完整的单元测试和集成测试
+- 系统问题修复和优化
 
 ## 修复记录
 
