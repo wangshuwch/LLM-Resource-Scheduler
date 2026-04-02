@@ -11,10 +11,10 @@ def fix_html_entities(file_path):
         '&lt;': '&lt;',
         '&gt;': '&gt;',
         '&amp;': '&amp;',
-        '&le;': '&lt;=',
-        '&ge;': '&gt;=',
-        '&ne;': '!=',
-        '&eq;': '=='
+        '&lt;=': '&lt;=',
+        '&gt;=': '&gt;=',
+        '!=': '!=',
+        '==': '=='
     }
     
     for html_entity, python_op in replacements.items():

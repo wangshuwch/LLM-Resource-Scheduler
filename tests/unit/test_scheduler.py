@@ -55,14 +55,17 @@ async def test_submit_request_valid(scheduler):
     req_id = await scheduler.submit_request(request)
     
     assert req_id == request.request_id
-    assert scheduler.get_request_status(req_id) == RequestStatus.PENDING
-    assert len(scheduler.request_queue) == 1
+    # 资源充足时，请求会直接处理
+    assert scheduler.get_request_status(req_id) == RequestStatus.PROCESSING
+    assert len(scheduler.request_queue) == 0
+    assert req_id in scheduler.processing_requests
 
 
 @pytest.mark.asyncio
 async def test_request_priority_sorting(scheduler):
-    scene_high = Scene(scene_id="high_priority", priority=10, max_qpm=10, max_tpm=1000)
-    scene_low = Scene(scene_id="low_priority", priority=1, max_qpm=10, max_tpm=1000)
+    # 创建两个场景，设置较低的QPM限制
+    scene_high = Scene(scene_id="high_priority", priority=10, max_qpm=0, max_tpm=1000)  # QPM为0，强制进入队列
+    scene_low = Scene(scene_id="low_priority", priority=1, max_qpm=0, max_tpm=1000)    # QPM为0，强制进入队列
     scheduler.register_scene(scene_high)
     scheduler.register_scene(scene_low)
     
@@ -73,8 +76,9 @@ async def test_request_priority_sorting(scheduler):
     await scheduler.submit_request(req_high)
     
     assert len(scheduler.request_queue) == 2
+    # 按优先级排序，高优先级在前
     neg_priority, _, _, request = scheduler.request_queue[0]
-    assert neg_priority == -10
+    assert neg_priority == -10  # 负数优先级，值越小优先级越高
     assert request.request_id == req_high.request_id
 
 
@@ -157,3 +161,40 @@ async def test_system_status(scheduler):
     assert status["processing_count"] == 0
     assert "test_scene" in status["scenes"]
     assert status["scenes"]["test_scene"]["priority"] == 5
+
+
+@pytest.mark.asyncio
+async def test_resource_sufficient_direct_processing(scheduler):
+    """测试资源充足场景下请求直接处理，不排队"""
+    scene = Scene(scene_id="test_scene", priority=5, max_qpm=10, max_tpm=1000)
+    scheduler.register_scene(scene)
+    
+    # 确保资源充足
+    assert scheduler._is_resource_sufficient()
+    
+    request = Request(scene_id="test_scene", prompt="test", max_output_token=10)
+    req_id = await scheduler.submit_request(request)
+    
+    # 资源充足时，请求应该直接处理，不进入队列
+    assert scheduler.get_request_status(req_id) == RequestStatus.PROCESSING
+    assert len(scheduler.request_queue) == 0
+    assert req_id in scheduler.processing_requests
+
+
+@pytest.mark.asyncio
+async def test_has_available_resources(scheduler):
+    """测试资源充足性检查"""
+    scene = Scene(scene_id="test_scene", priority=5, max_qpm=10, max_tpm=1000)
+    scheduler.register_scene(scene)
+    
+    request = Request(scene_id="test_scene", prompt="test", max_output_token=10)
+    
+    # 资源充足时应返回True
+    assert scheduler._has_available_resources("test_scene", 20)
+    
+    # 模拟场景QPM达到上限
+    for _ in range(10):
+        scheduler.monitor.record_request(request)
+    
+    # 场景QPM达到上限时应返回False
+    assert not scheduler._has_available_resources("test_scene", 20)

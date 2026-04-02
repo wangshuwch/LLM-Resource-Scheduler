@@ -26,6 +26,11 @@ class Request(BaseModel):
     prompt: str
     max_output_token: int
     created_at: datetime = Field(default_factory=datetime.now)
+    status: RequestStatus = RequestStatus.PENDING
+    enqueue_time: datetime = Field(default_factory=datetime.now)
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    token_consumption: int | None = None
 
 
 class LoadMetrics(BaseModel):
